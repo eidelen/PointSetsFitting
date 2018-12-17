@@ -1,5 +1,7 @@
 import unittest
 import numpy as np
+from transforms3d.euler import euler2mat
+from transforms3d.affines import compose
 import point_sets_fitting as psf
 
 
@@ -52,9 +54,7 @@ class PsfTester(unittest.TestCase):
     def test_fitting_translation(self):
 
         setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
-        expectedTransformation = np.asmatrix(np.eye(4, 4))
-        expectedTransformation[0,3] = 10
-        expectedTransformation[1, 3] = 2
+        expectedTransformation = compose([10 ,2 ,5], np.eye(3,3), np.ones(3))
         setB = expectedTransformation * psf.toHomogeneous(setA)
 
         expectedError = 0;
@@ -63,6 +63,37 @@ class PsfTester(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(expectedTransformation, transformation, decimal=5)
         self.assertAlmostEqual(expectedError,err,delta = 0.0001)
+
+
+    def test_fitting_rotation(self):
+
+        setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
+
+        expectedTransformation = compose(np.zeros(3),euler2mat(0.1, 0.2, 0.3),np.ones(3))
+        setB = expectedTransformation * psf.toHomogeneous(setA)
+
+        expectedError = 0;
+
+        transformation, err = psf.pointSetFitting(setA, setB[0:3, :])
+
+        np.testing.assert_array_almost_equal(expectedTransformation, transformation, decimal=5)
+        self.assertAlmostEqual(expectedError, err, delta=0.0001)
+
+
+    def test_fitting_noisefree(self):
+
+        for k in xrange(1000):
+            setA = np.asmatrix(np.random.rand(3,5))
+            trans = np.random.rand(1, 3)
+            expTr = compose(trans[0, :], euler2mat(np.random.rand(), np.random.rand(), np.random.rand()), np.ones(3))
+            setB = expTr * psf.toHomogeneous(setA)
+
+            expError = 0;
+
+            transformation, err = psf.pointSetFitting(setA, setB[0:3, :])
+
+            np.testing.assert_array_almost_equal(expTr, transformation, decimal=5)
+            self.assertAlmostEqual(expError, err, delta=0.0001)
 
 
     def test_point_set_error(self):
