@@ -5,6 +5,16 @@ import point_sets_fitting as psf
 
 class PsfTester(unittest.TestCase):
 
+    def test_toHomogeneous(self):
+
+        setIn = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
+        outExpected = np.mat('0 0 0 1; 1 0 0 1; 0 1 0 1; 0 0 2 1').transpose()
+
+        out = psf.toHomogeneous(setIn)
+
+        np.testing.assert_array_almost_equal(outExpected, out, decimal=5)
+
+
     def test_center(self):
 
         testInput = np.mat('0  0  0; 0  4  0 ; 8  0  0; 0  0  12').transpose()
@@ -41,18 +51,19 @@ class PsfTester(unittest.TestCase):
 
     def test_fitting_translation(self):
 
-        setA = np.mat('0 0 0 1; 1 0 0 1; 0 1 0 1; 0 0 2 1').transpose()
+        setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
         expectedTransformation = np.asmatrix(np.eye(4, 4))
         expectedTransformation[0,3] = 10
         expectedTransformation[1, 3] = 2
-        setB = expectedTransformation * setA
+        setB = expectedTransformation * psf.toHomogeneous(setA)
 
         expectedError = 0;
 
-        transformation, err = psf.pointSetFitting(setA[0:3,:], setB[0:3,:])
+        transformation, err = psf.pointSetFitting(setA, setB[0:3,:])
 
         np.testing.assert_array_almost_equal(expectedTransformation, transformation, decimal=5)
         self.assertAlmostEqual(expectedError,err,delta = 0.0001)
+
 
 
 if __name__ == '__main__':
