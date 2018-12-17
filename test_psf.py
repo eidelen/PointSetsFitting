@@ -65,6 +65,16 @@ class PsfTester(unittest.TestCase):
         self.assertAlmostEqual(expectedError,err,delta = 0.0001)
 
 
+    def test_point_set_error(self):
+        setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
+        setB = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 -2').transpose()
+        tf = np.asmatrix( np.eye(4,4) )
+        expectedError = 1;
+
+        err = psf.fittingError(setA, setB, tf)
+
+        self.assertAlmostEqual(expectedError, err, delta=0.0001)
+
 
 if __name__ == '__main__':
     unittest.main()
