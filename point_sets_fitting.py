@@ -26,11 +26,12 @@ def pointSetFitting( setA, setB ):
     # fix rotation if necessary -> reflections
     det = np.linalg.det(rotation)
     if  det < 0 :
-        print("Reflection occured. Determinant = %.3f" % (det))
         vh[2,:] = vh[2,:] * (-1)
         rotation = vh.transpose() * u.transpose();
         det = np.linalg.det(rotation)
-        print("Rotation correction. Determinant = %.3f" % (det))
+
+    # if rotation matrix determinant is different from +1, there is a problem with this very matrix.
+    assert isclose(det, 1.0)
 
     # compute translation
     trans = transB - (rotation * transA)
@@ -42,6 +43,10 @@ def pointSetFitting( setA, setB ):
 
     return rigidTransformation, fittingError(setA, setB, rigidTransformation)
 
+
+# from https://stackoverflow.com/questions/5595425/what-is-the-best-way-to-compare-floats-for-almost-equality-in-python
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
 def getPointSetCenter(aPointSet):
