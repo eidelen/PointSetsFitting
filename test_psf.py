@@ -80,10 +80,10 @@ class PsfTester(unittest.TestCase):
         self.assertAlmostEqual(expectedError, err, delta=0.0001)
 
 
-    def test_fitting_noisefree(self):
+    def test_fitting_noisefree_3P(self):
 
         for k in xrange(1000):
-            setA = np.asmatrix(np.random.rand(3,5))
+            setA = np.asmatrix(np.random.rand(3,3))
             trans = np.random.rand(1, 3)
             expTr = compose(trans[0, :], euler2mat(np.random.rand(), np.random.rand(), np.random.rand()), np.ones(3))
             setB = expTr * psf.toHomogeneous(setA)
@@ -91,6 +91,10 @@ class PsfTester(unittest.TestCase):
             expError = 0;
 
             transformation, err = psf.pointSetFitting(setA, setB[0:3, :])
+
+            print( expTr )
+            print( transformation )
+            print(err)
 
             np.testing.assert_array_almost_equal(expTr, transformation, decimal=5)
             self.assertAlmostEqual(expError, err, delta=0.0001)

@@ -24,11 +24,13 @@ def pointSetFitting( setA, setB ):
     rotation = vh.transpose() * u.transpose()
 
     # fix rotation if necessary -> reflections
-    if np.linalg.det(rotation) < 0 :
-        print("Reflection occured")
-        vhMod = np.asmatrix(np.zeros(vh.shape))
-        vhMod[:,3] = vh[:,3] * (-1)
-        rotation = vhMod.transpose() * u.transpose;
+    det = np.linalg.det(rotation)
+    if  det < 0 :
+        print("Reflection occured. Determinant = %.3f" % (det))
+        vh[2,:] = vh[2,:] * (-1)
+        rotation = vh.transpose() * u.transpose();
+        det = np.linalg.det(rotation)
+        print("Rotation correction. Determinant = %.3f" % (det))
 
     # compute translation
     trans = transB - (rotation * transA)
@@ -38,7 +40,6 @@ def pointSetFitting( setA, setB ):
     rigidTransformation[0:3, 0:3] = rotation
     rigidTransformation[0:3,3] = trans
 
-    #todo: compute transformation error
     return rigidTransformation, fittingError(setA, setB, rigidTransformation)
 
 
