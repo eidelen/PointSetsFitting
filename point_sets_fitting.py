@@ -2,8 +2,10 @@ import numpy as np
 
 
 def pointSetFitting( setA, setB ):
-    assert isinstance(setA, np.matrix)
-    assert isinstance(setB, np.matrix)
+
+    # check and transform parameters
+    setA = np.asmatrix(setA);
+    setB = np.asmatrix(setB);
 
     nbrPoints = setA.shape[1]
 

@@ -51,6 +51,20 @@ class PsfTester(unittest.TestCase):
         self.assertAlmostEqual(expectedError,err,delta = 0.0001)
 
 
+    def test_fitting_identity_arrinput(self):
+
+        setA = np.array([[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0] ,[0, 0 ,2]]).transpose()
+        setB = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]]).transpose()
+
+        expectedError = 0;
+        expectedTransformation = np.asmatrix(np.eye(4, 4))
+
+        transformation, err = psf.pointSetFitting(setA, setB)
+
+        np.testing.assert_array_almost_equal(expectedTransformation, transformation, decimal=5)
+        self.assertAlmostEqual(expectedError, err, delta=0.0001)
+
+
     def test_fitting_translation(self):
 
         setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
