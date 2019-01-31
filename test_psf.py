@@ -65,6 +65,43 @@ class PsfTester(unittest.TestCase):
         self.assertAlmostEqual(expectedError, err, delta=0.0001)
 
 
+    def test_fitting_identity_list(self):
+
+        listA = [[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0] ,[0, 0 ,2]]
+        listB = [[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0] ,[0, 0 ,2]]
+
+        expectedError = 0;
+        expectedTransformation = np.asmatrix(np.eye(4, 4))
+
+        transformation, err = psf.pointSetFitting(listA, listB)
+
+        np.testing.assert_array_almost_equal(expectedTransformation, transformation, decimal=5)
+        self.assertAlmostEqual(expectedError, err, delta=0.0001)
+
+
+    def test_fitting_differen_set_lengths(self):
+        with self.assertRaises(Exception):
+            listA = [[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0] ,[0, 0 ,2]]
+            listB = [[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0]]
+            psf.pointSetFitting(listA, listB)
+
+
+    def test_fitting_too_few_points(self):
+        with self.assertRaises(Exception):
+            listA = [[0, 0, 0], [1, 0, 0]]
+            listB = [[0, 0, 0], [1, 0, 0]]
+
+            psf.pointSetFitting(listA, listB)
+
+
+    def test_fitting_vector_dimension(self):
+        with self.assertRaises(Exception):
+            listA = [[0, 0], [1, 0], [0, 1]]
+            listB = [[0, 0], [1, 0], [0, 1]]
+
+            psf.pointSetFitting(listA, listB)
+
+
     def test_fitting_translation(self):
 
         setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()

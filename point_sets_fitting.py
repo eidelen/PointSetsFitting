@@ -3,11 +3,30 @@ import numpy as np
 
 def pointSetFitting( setA, setB ):
 
+
     # check and transform parameters
+
+    # list of points -> [ax, ay, az], [bx, by, bz], ...
+    if isinstance(setA, list):
+        setA = np.asmatrix(setA).transpose();
+    if isinstance(setB, list):
+        setB = np.asmatrix(setB).transpose();
+
+    # matrix or numpy array
     setA = np.asmatrix(setA);
     setB = np.asmatrix(setB);
 
+    dataDim = setA.shape[0]
     nbrPoints = setA.shape[1]
+
+    # check input data
+    if dataDim < 3:
+        raise Exception('Wrong vector dimension')
+    if nbrPoints < 3:
+        raise Exception('Too few point correspondences')
+    if setA.shape[1] != setB.shape[1]:
+        raise Exception('Mismatching point set sizes')
+
 
     # move point sets to center
     cSetA, transA = movePointSetToCenter(setA)
