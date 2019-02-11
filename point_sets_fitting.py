@@ -34,7 +34,7 @@ def pointSetFitting( setA, setB ):
 
     # compute rotation
     h = np.asmatrix(np.zeros((3,3)))
-    for i in xrange(nbrPoints):
+    for i in range(nbrPoints):
         pA = cSetA[:,i]
         pB = cSetB[:,i]
 
@@ -84,7 +84,7 @@ def movePointSetToCenter(aPointSet):
     center = getPointSetCenter(aPointSet)
     mvSet = np.asmatrix(np.zeros( aPointSet.shape ))
 
-    for i in xrange(nbrOfPoints):
+    for i in range(nbrOfPoints):
         mvSet[:,i] = aPointSet[:,i] - center
 
     return mvSet, center
@@ -102,7 +102,7 @@ def fittingError(setA, setB, transformation):
 
     nbrOfPoints = diffSetB.shape[1]
     accumNorm = 0
-    for i in xrange(nbrOfPoints):
+    for i in range(nbrOfPoints):
         accumNorm += np.linalg.norm(diffSetB[:, i])
 
     return accumNorm / nbrOfPoints
