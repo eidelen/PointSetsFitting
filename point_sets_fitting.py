@@ -1,118 +1,140 @@
+"""
+This is a python implementation of the algorithm "Least-Squares Fitting of
+two 3d Point Sets". This method can be used to compute the rigid transformation
+between two sets of corresponding 3D vectors.
+"""
+
 import numpy as np
 
-
-def pointSetFitting( setA, setB ):
-
+def point_sets_fitting(set_a, set_b):
+    """
+    Computes the rigid transformation between two sets of
+    corresponding points.
+    :param set_a: Point set A
+    :param set_b: Point set B
+    :return: (Rigid transformation, fitting error)
+    """
 
     # check and transform parameters
 
     # list of points -> [ax, ay, az], [bx, by, bz], ...
-    if isinstance(setA, list):
-        setA = np.asmatrix(setA).transpose();
-    if isinstance(setB, list):
-        setB = np.asmatrix(setB).transpose();
+    if isinstance(set_a, list):
+        set_a = np.asmatrix(set_a).transpose()
+    if isinstance(set_b, list):
+        set_b = np.asmatrix(set_b).transpose()
 
     # matrix or numpy array
-    setA = np.asmatrix(setA);
-    setB = np.asmatrix(setB);
+    set_a = np.asmatrix(set_a)
+    set_b = np.asmatrix(set_b)
 
-    dataDim = setA.shape[0]
-    nbrPoints = setA.shape[1]
+    n_points = set_a.shape[1]
 
     # check input data
-    if dataDim < 3:
+    if set_a.shape[0] < 3: # data dimension
         raise Exception('Wrong vector dimension')
-    if nbrPoints < 3:
+    if n_points < 3:
         raise Exception('Too few point correspondences')
-    if setA.shape[1] != setB.shape[1]:
+    if set_a.shape[1] != set_b.shape[1]:
         raise Exception('Mismatching point set sizes')
 
 
     # move point sets to center
-    cSetA, transA = movePointSetToCenter(setA)
-    cSetB, transB = movePointSetToCenter(setB)
+    centered_a, translation_a = move_point_set_to_center(set_a)
+    centered_b, translation_b = move_point_set_to_center(set_b)
 
     # compute rotation
-    h = np.asmatrix(np.zeros((3,3)))
-    for i in range(nbrPoints):
-        pA = cSetA[:,i]
-        pB = cSetB[:,i]
+    h_3x3 = np.asmatrix(np.zeros((3, 3)))
+    for i in range(n_points):
+        h_3x3 = h_3x3 + centered_a[:, i] * centered_b[:, i].transpose()
 
-        h = h + pA * pB.transpose()
+    u_orth, _, vh_orth = np.linalg.svd(h_3x3)
 
-    u, s, vh = np.linalg.svd(h)
-
-    rotation = vh.transpose() * u.transpose()
+    lsq_rotation = vh_orth.transpose() * u_orth.transpose()
 
     # fix rotation if necessary -> reflections
-    det = np.linalg.det(rotation)
-    if  det < 0 :
-        vh[2,:] = vh[2,:] * (-1)
-        rotation = vh.transpose() * u.transpose();
-        det = np.linalg.det(rotation)
+    det = np.linalg.det(lsq_rotation)
+    if  det < 0:
+        vh_orth[2, :] = vh_orth[2, :] * (-1)
+        lsq_rotation = vh_orth.transpose() * u_orth.transpose()
+        det = np.linalg.det(lsq_rotation)
 
     # if rotation matrix determinant is different from +1, there is a problem with this very matrix.
-    assert isclose(det, 1.0)
+    assert __isclose(det, 1.0)
 
     # compute translation
-    trans = transB - (rotation * transA)
+    trans = translation_b - (lsq_rotation * translation_a)
 
     # compose a 4x4 matrix of rotation and translation
-    rigidTransformation = np.asmatrix(np.eye(4,4))
-    rigidTransformation[0:3, 0:3] = rotation
-    rigidTransformation[0:3,3] = trans
+    rigid_transformation = np.asmatrix(np.eye(4, 4))
+    rigid_transformation[0:3, 0:3] = lsq_rotation
+    rigid_transformation[0:3, 3] = trans
 
-    return rigidTransformation, fittingError(setA, setB, rigidTransformation)
+    return rigid_transformation, compute_fitting_error(set_a, set_b, rigid_transformation)
 
 
 # from https://stackoverflow.com/questions/5595425/what-is-the-best-way-to-compare-floats-for-almost-equality-in-python
-def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+def __isclose(a_val, b_val, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a_val - b_val) <= max(rel_tol * max(abs(a_val), abs(b_val)), abs_tol)
 
 
-def getPointSetCenter(aPointSet):
-    assert isinstance(aPointSet, np.matrix)
+def compute_point_set_center(point_set):
+    """
+    Computes the center of a point set.
+    :param point_set: Point set
+    :return: Center position
+    """
+    assert isinstance(point_set, np.matrix)
 
-    return np.asmatrix(aPointSet.sum(axis=1) * 1.0/aPointSet.shape[1])
-
-
-
-def movePointSetToCenter(aPointSet):
-    assert isinstance(aPointSet, np.matrix)
-
-    nbrOfPoints = aPointSet.shape[1]
-    center = getPointSetCenter(aPointSet)
-    mvSet = np.asmatrix(np.zeros( aPointSet.shape ))
-
-    for i in range(nbrOfPoints):
-        mvSet[:,i] = aPointSet[:,i] - center
-
-    return mvSet, center
+    return np.asmatrix(point_set.sum(axis=1) * 1.0 / point_set.shape[1])
 
 
-def fittingError(setA, setB, transformation):
-    assert isinstance(setA, np.matrix)
-    assert isinstance(setB, np.matrix)
+def move_point_set_to_center(point_set):
+    """
+    Move point set to its center.
+    :param point_set: Point set
+    :return: Centered point set.
+    """
+    assert isinstance(point_set, np.matrix)
+
+    center = compute_point_set_center(point_set)
+    centered_set = np.asmatrix(np.zeros(point_set.shape))
+
+    for i in range(point_set.shape[1]):
+        centered_set[:, i] = point_set[:, i] - center
+
+    return centered_set, center
+
+
+def compute_fitting_error(set_a, set_b, transformation):
+    """
+    Computes the fitting error.
+    :param set_a: Point set a
+    :param set_b: Point set b
+    :param transformation: Rigid transformation matrix
+    :return: Transformation error
+    """
+    assert isinstance(set_a, np.matrix)
+    assert isinstance(set_b, np.matrix)
     assert isinstance(transformation, np.matrix)
 
-    setAH = toHomogeneous(setA)
-    setBH = toHomogeneous(setB)
+    set_a = to_homogeneous_repr(set_a)
+    set_b = to_homogeneous_repr(set_b)
 
-    diffSetB = transformation * setAH - setBH
+    diff_set_b = transformation * set_a - set_b
 
-    nbrOfPoints = diffSetB.shape[1]
-    accumNorm = 0
-    for i in range(nbrOfPoints):
-        accumNorm += np.linalg.norm(diffSetB[:, i])
+    nbr_of_points = diff_set_b.shape[1]
+    accum_norm = 0
+    for i in range(nbr_of_points):
+        accum_norm += np.linalg.norm(diff_set_b[:, i])
 
-    return accumNorm / nbrOfPoints
+    return accum_norm / nbr_of_points
 
 
-def toHomogeneous(points):
+def to_homogeneous_repr(points):
+    """Adds the homogeneous 4th line"""
     assert isinstance(points, np.matrix)
 
-    pntH = np.asmatrix(np.ones( (points.shape[0]+1, points.shape[1]) ))
-    pntH[0:3,:] = points
+    pnt_h = np.asmatrix(np.ones((points.shape[0]+1, points.shape[1])))
+    pnt_h[0:3, :] = points
 
-    return pntH
-
+    return pnt_h
