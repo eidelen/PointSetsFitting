@@ -5,8 +5,9 @@ between two sets of corresponding 3D vectors.
 """
 
 import numpy as np
+from typing import Tuple
 
-def point_sets_fitting(set_a, set_b):
+def point_sets_fitting(set_a, set_b) -> Tuple[np.matrix, float]:
     """
     Computes the rigid transformation between two sets of
     corresponding points.
@@ -15,17 +16,19 @@ def point_sets_fitting(set_a, set_b):
     :return: (Rigid transformation, fitting error)
     """
 
-    # check and transform parameters
+    # check and transform input parameters
+
+    # points as ndarray
+    if isinstance(set_a, np.ndarray):
+        set_a = np.asmatrix(set_a)
+    if isinstance(set_b, np.ndarray):
+        set_b = np.asmatrix(set_b)
 
     # list of points -> [ax, ay, az], [bx, by, bz], ...
     if isinstance(set_a, list):
         set_a = np.asmatrix(set_a).transpose()
     if isinstance(set_b, list):
         set_b = np.asmatrix(set_b).transpose()
-
-    # matrix or numpy array
-    set_a = np.asmatrix(set_a)
-    set_b = np.asmatrix(set_b)
 
     n_points = set_a.shape[1]
 
@@ -73,28 +76,25 @@ def point_sets_fitting(set_a, set_b):
 
 
 # from https://stackoverflow.com/questions/5595425/what-is-the-best-way-to-compare-floats-for-almost-equality-in-python
-def __isclose(a_val, b_val, rel_tol=1e-09, abs_tol=0.0):
+def __isclose(a_val: float, b_val: float, rel_tol=1e-09, abs_tol=0.0) -> bool:
     return abs(a_val - b_val) <= max(rel_tol * max(abs(a_val), abs(b_val)), abs_tol)
 
 
-def compute_point_set_center(point_set):
+def compute_point_set_center(point_set: np.matrix) -> np.matrix:
     """
     Computes the center of a point set.
     :param point_set: Point set
     :return: Center position
     """
-    assert isinstance(point_set, np.matrix)
-
     return np.asmatrix(point_set.sum(axis=1) * 1.0 / point_set.shape[1])
 
 
-def move_point_set_to_center(point_set):
+def move_point_set_to_center(point_set: np.matrix) -> Tuple[np.matrix, np.matrix]:
     """
     Move point set to its center.
     :param point_set: Point set
     :return: Centered point set.
     """
-    assert isinstance(point_set, np.matrix)
 
     center = compute_point_set_center(point_set)
     centered_set = np.asmatrix(np.zeros(point_set.shape))
@@ -105,7 +105,7 @@ def move_point_set_to_center(point_set):
     return centered_set, center
 
 
-def compute_fitting_error(set_a, set_b, transformation):
+def compute_fitting_error(set_a: np.matrix, set_b: np.matrix, transformation: np.matrix) -> float:
     """
     Computes the fitting error.
     :param set_a: Point set a
@@ -113,9 +113,6 @@ def compute_fitting_error(set_a, set_b, transformation):
     :param transformation: Rigid transformation matrix
     :return: Transformation error
     """
-    assert isinstance(set_a, np.matrix)
-    assert isinstance(set_b, np.matrix)
-    assert isinstance(transformation, np.matrix)
 
     set_a = to_homogeneous_repr(set_a)
     set_b = to_homogeneous_repr(set_b)
@@ -130,11 +127,8 @@ def compute_fitting_error(set_a, set_b, transformation):
     return accum_norm / nbr_of_points
 
 
-def to_homogeneous_repr(points):
+def to_homogeneous_repr(points: np.matrix) -> np.matrix:
     """Adds the homogeneous 4th line"""
-    assert isinstance(points, np.matrix)
-
     pnt_h = np.asmatrix(np.ones((points.shape[0]+1, points.shape[1])))
     pnt_h[0:3, :] = points
-
     return pnt_h
