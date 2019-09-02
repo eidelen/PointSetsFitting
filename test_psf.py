@@ -9,46 +9,44 @@ class PsfTester(unittest.TestCase):
 
     def test_toHomogeneous(self):
 
-        setIn = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
-        outExpected = np.mat('0 0 0 1; 1 0 0 1; 0 1 0 1; 0 0 2 1').transpose()
-
-        out = psf.to_homogeneous_repr(setIn)
-
-        np.testing.assert_array_almost_equal(outExpected, out, decimal=5)
+        set_in = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]]).transpose()
+        set_out_expected = np.array([[0, 0, 0, 1], [1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 2, 1]]).transpose()
+        set_out = psf.to_homogeneous_repr(set_in)
+        np.testing.assert_array_almost_equal(set_out_expected, set_out, decimal=5)
 
 
     def test_center(self):
 
-        testInput = np.mat('0  0  0; 0  4  0 ; 8  0  0; 0  0  12').transpose()
-        centerIs = np.mat('2; 1; 3')
-        centerComputed = psf.compute_point_set_center(testInput)
-        self.assertTrue(np.array_equal(centerIs,centerComputed))
+        test_input = np.array([[0, 0, 0], [0, 4, 0], [8, 0, 0], [0, 0, 12]]).transpose()
+        center_is = np.array([2, 1, 3])
+        center_computed = psf.compute_point_set_center(test_input)
+        self.assertTrue(np.array_equal(center_is,center_computed))
 
 
     def test_move_to_center(self):
 
-        testInput = np.mat('0  0  0; 0  4  0 ; 8  0  0; 0  0  12').transpose()
-        movedAre = np.mat('-2  -1  -3; -2  3  -3 ; 6  -1  -3; -2  -1  9').transpose()
-        centerIs = np.mat('2; 1; 3')
+        test_input = np.array([[0, 0, 0], [0, 4, 0], [8, 0, 0], [0, 0, 12]]).transpose()
+        moved_is = np.array([[-2, -1, -3], [-2, 3, -3], [6, -1, -3], [-2, -1, 9]]).transpose()
+        center_is = np.array([2, 1, 3])
 
-        movedComputed, centerComputed = psf.move_point_set_to_center(testInput)
+        moved_computed, center_computed = psf.move_point_set_to_center(test_input)
 
-        self.assertTrue(np.array_equal(movedAre,movedComputed))
-        self.assertTrue(np.array_equal(centerIs, centerComputed))
+        self.assertTrue(np.array_equal(moved_is, moved_computed))
+        self.assertTrue(np.array_equal(center_is, center_computed))
 
 
     def test_fitting_identity(self):
 
-        setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
-        setB = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
+        set_a = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]]).transpose()
+        set_b = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]]).transpose()
 
-        expectedError = 0;
-        expectedTransformation = np.asmatrix(np.eye(4,4))
+        expected_error = 0;
+        expected_transformation = np.eye(4,4)
 
-        transformation, err = psf.point_sets_fitting(setA, setB)
+        transformation, err = psf.point_sets_fitting(set_a, set_b)
 
-        np.testing.assert_array_almost_equal(expectedTransformation, transformation, decimal=5)
-        self.assertAlmostEqual(expectedError,err,delta = 0.0001)
+        np.testing.assert_array_almost_equal(expected_transformation, transformation, decimal=5)
+        self.assertAlmostEqual(expected_error, err, delta = 0.0001)
 
 
     def test_fitting_identity_arrinput(self):

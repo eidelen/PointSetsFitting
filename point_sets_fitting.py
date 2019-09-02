@@ -7,7 +7,7 @@ between two sets of corresponding 3D vectors.
 import numpy as np
 from typing import Tuple
 
-def point_sets_fitting(set_a, set_b) -> Tuple[np.matrix, float]:
+def point_sets_fitting(set_a: np.ndarray, set_b: np.ndarray) -> Tuple[np.ndarray, float]:
     """
     Computes the rigid transformation between two sets of
     corresponding points.
@@ -15,20 +15,6 @@ def point_sets_fitting(set_a, set_b) -> Tuple[np.matrix, float]:
     :param set_b: Point set B
     :return: (Rigid transformation, fitting error)
     """
-
-    # check and transform input parameters
-
-    # points as ndarray
-    if isinstance(set_a, np.ndarray):
-        set_a = np.asmatrix(set_a)
-    if isinstance(set_b, np.ndarray):
-        set_b = np.asmatrix(set_b)
-
-    # list of points -> [ax, ay, az], [bx, by, bz], ...
-    if isinstance(set_a, list):
-        set_a = np.asmatrix(set_a).transpose()
-    if isinstance(set_b, list):
-        set_b = np.asmatrix(set_b).transpose()
 
     n_points = set_a.shape[1]
 
@@ -80,16 +66,16 @@ def __isclose(a_val: float, b_val: float, rel_tol=1e-09, abs_tol=0.0) -> bool:
     return abs(a_val - b_val) <= max(rel_tol * max(abs(a_val), abs(b_val)), abs_tol)
 
 
-def compute_point_set_center(point_set: np.matrix) -> np.matrix:
+def compute_point_set_center(point_set: np.ndarray) -> np.ndarray:
     """
     Computes the center of a point set.
     :param point_set: Point set
     :return: Center position
     """
-    return np.asmatrix(point_set.sum(axis=1) * 1.0 / point_set.shape[1])
+    center = point_set.sum(axis=1) * (1.0 / point_set.shape[1])
+    return center
 
-
-def move_point_set_to_center(point_set: np.matrix) -> Tuple[np.matrix, np.matrix]:
+def move_point_set_to_center(point_set: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     Move point set to its center.
     :param point_set: Point set
@@ -97,7 +83,7 @@ def move_point_set_to_center(point_set: np.matrix) -> Tuple[np.matrix, np.matrix
     """
 
     center = compute_point_set_center(point_set)
-    centered_set = np.asmatrix(np.zeros(point_set.shape))
+    centered_set = np.zeros(point_set.shape)
 
     for i in range(point_set.shape[1]):
         centered_set[:, i] = point_set[:, i] - center
@@ -127,8 +113,8 @@ def compute_fitting_error(set_a: np.matrix, set_b: np.matrix, transformation: np
     return accum_norm / nbr_of_points
 
 
-def to_homogeneous_repr(points: np.matrix) -> np.matrix:
+def to_homogeneous_repr(points: np.ndarray) -> np.ndarray:
     """Adds the homogeneous 4th line"""
-    pnt_h = np.asmatrix(np.ones((points.shape[0]+1, points.shape[1])))
+    pnt_h = np.ones((points.shape[0]+1, points.shape[1]))
     pnt_h[0:3, :] = points
     return pnt_h
