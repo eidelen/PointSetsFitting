@@ -49,34 +49,6 @@ class PsfTester(unittest.TestCase):
         self.assertAlmostEqual(expected_error, err, delta = 0.0001)
 
 
-    def test_fitting_identity_arrinput(self):
-
-        setA = np.array([[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0] ,[0, 0 ,2]]).transpose()
-        setB = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]]).transpose()
-
-        expectedError = 0;
-        expectedTransformation = np.asmatrix(np.eye(4, 4))
-
-        transformation, err = psf.point_sets_fitting(setA, setB)
-
-        np.testing.assert_array_almost_equal(expectedTransformation, transformation, decimal=5)
-        self.assertAlmostEqual(expectedError, err, delta=0.0001)
-
-
-    def test_fitting_identity_list(self):
-
-        listA = [[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0] ,[0, 0 ,2]]
-        listB = [[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0] ,[0, 0 ,2]]
-
-        expectedError = 0;
-        expectedTransformation = np.asmatrix(np.eye(4, 4))
-
-        transformation, err = psf.point_sets_fitting(listA, listB)
-
-        np.testing.assert_array_almost_equal(expectedTransformation, transformation, decimal=5)
-        self.assertAlmostEqual(expectedError, err, delta=0.0001)
-
-
     def test_fitting_differen_set_lengths(self):
         with self.assertRaises(Exception):
             listA = [[0, 0, 0] ,[1, 0, 0] ,[0, 1, 0] ,[0, 0 ,2]]
@@ -102,9 +74,9 @@ class PsfTester(unittest.TestCase):
 
     def test_fitting_translation(self):
 
-        setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
+        setA = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]]).transpose()
         expectedTransformation = compose([10 ,2 ,5], np.eye(3,3), np.ones(3))
-        setB = expectedTransformation * psf.to_homogeneous_repr(setA)
+        setB = expectedTransformation @ psf.to_homogeneous_repr(setA)
 
         expectedError = 0;
 
@@ -115,11 +87,10 @@ class PsfTester(unittest.TestCase):
 
 
     def test_fitting_rotation(self):
-
-        setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
+        setA = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]]).transpose()
 
         expectedTransformation = compose(np.zeros(3),euler2mat(0.1, 0.2, 0.3),np.ones(3))
-        setB = expectedTransformation * psf.to_homogeneous_repr(setA)
+        setB = expectedTransformation @ psf.to_homogeneous_repr(setA)
 
         expectedError = 0;
 
@@ -132,10 +103,10 @@ class PsfTester(unittest.TestCase):
     def test_fitting_noisefree_3P(self):
 
         for k in range(1000):
-            setA = np.asmatrix(np.random.rand(3,3))
+            setA = np.random.rand(3,3)
             trans = np.random.rand(1, 3)
             expTr = compose(trans[0, :], euler2mat(np.random.rand(), np.random.rand(), np.random.rand()), np.ones(3))
-            setB = expTr * psf.to_homogeneous_repr(setA)
+            setB = expTr @ psf.to_homogeneous_repr(setA)
 
             expError = 0;
 
@@ -148,10 +119,10 @@ class PsfTester(unittest.TestCase):
     def test_fitting_noisefree_10P(self):
 
         for k in range(1000):
-            setA = np.asmatrix(np.random.rand(3,10))
+            setA = np.random.rand(3,10)
             trans = np.random.rand(1, 3)
             expTr = compose(trans[0, :], euler2mat(np.random.rand(), np.random.rand(), np.random.rand()), np.ones(3))
-            setB = expTr * psf.to_homogeneous_repr(setA)
+            setB = expTr @ psf.to_homogeneous_repr(setA)
 
             expError = 0;
 
@@ -162,9 +133,9 @@ class PsfTester(unittest.TestCase):
 
 
     def test_point_set_error(self):
-        setA = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 2').transpose()
-        setB = np.mat('0 0 0; 1 0 0; 0 1 0; 0 0 -2').transpose()
-        tf = np.asmatrix( np.eye(4,4) )
+        setA = np.array([[0, 0, 0],[1, 0, 0], [0, 1, 0], [0, 0, 2]]).transpose()
+        setB = np.array([[0, 0, 0],[1, 0, 0], [0, 1, 0], [0, 0, -2]]).transpose()
+        tf = np.eye(4,4)
         expectedError = 1;
 
         err = psf.compute_fitting_error(setA, setB, tf)
