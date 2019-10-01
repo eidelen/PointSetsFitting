@@ -64,15 +64,18 @@ class PsfTester(unittest.TestCase):
         with self.assertRaises(Exception):
             listA = [[0, 0, 0], [1, 0, 0]]
             listB = [[0, 0, 0], [1, 0, 0]]
-
             psf.point_sets_fitting(listA, listB)
 
 
     def test_fitting_vector_dimension(self):
         with self.assertRaises(Exception):
             listA = [[0, 0], [1, 0], [0, 1]]
-            listB = [[0, 0], [1, 0], [0, 1]]
+            listB = [[0, 0, 0], [1, 0, 0], [0, 1, 0]]
+            psf.point_sets_fitting(listA, listB)
 
+        with self.assertRaises(Exception):
+            listA = [[0, 0, 0], [1, 0, 0], [0, 1, 0]]
+            listB = [[0, 0], [1, 0], [0, 1]]
             psf.point_sets_fitting(listA, listB)
 
 

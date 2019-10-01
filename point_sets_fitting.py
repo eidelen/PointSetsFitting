@@ -7,7 +7,6 @@ between two sets of corresponding 3D vectors.
 from typing import Tuple
 import numpy as np
 
-
 def point_sets_fitting(set_a: np.ndarray, set_b: np.ndarray) -> Tuple[np.ndarray, float]:
     """
     Computes the rigid transformation between two sets of
@@ -18,13 +17,12 @@ def point_sets_fitting(set_a: np.ndarray, set_b: np.ndarray) -> Tuple[np.ndarray
     """
 
     # check input data
-    if set_a.shape[0] < 3: # data dimension
+    if set_a.shape[0] < 3 or set_b.shape[0] < 3: # data dimension
         raise Exception('Wrong vector dimension')
     if set_a.shape[1] < 3:
         raise Exception('Too few point correspondences')
     if set_a.shape[1] != set_b.shape[1]:
         raise Exception('Mismatching point set sizes')
-
 
     # move point sets to center
     centered_a, translation_a = move_point_set_to_center(set_a)
@@ -48,16 +46,17 @@ def point_sets_fitting(set_a: np.ndarray, set_b: np.ndarray) -> Tuple[np.ndarray
         lsq_rotation = vh_orth.transpose() @ u_orth.transpose()
         det = np.linalg.det(lsq_rotation)
 
-    # if rotation matrix determinant is different from +1, there is a problem with this very matrix.
-    assert __isclose(det, 1.0)
-
-    # compute translation
-    trans = translation_b - (lsq_rotation @ translation_a)
+    # if rotation matrix determinant is different from +1, there
+    # is a problem with this very solution.
+    if not __isclose(det, 1.0):
+        raise Exception('Invalid rotation matrix determinant: %.6f' % (det))
 
     # compose a 4x4 matrix of rotation and translation
     rigid_transformation = np.eye(4, 4)
+    # set rotation matrix
     rigid_transformation[0:3, 0:3] = lsq_rotation
-    rigid_transformation[0:3, 3] = trans
+    # compute and set translation vector
+    rigid_transformation[0:3, 3] = translation_b - (lsq_rotation @ translation_a)
 
     return rigid_transformation, compute_fitting_error(set_a, set_b, rigid_transformation)
 
