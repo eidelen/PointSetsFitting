@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.19)
 project(PointSetsFitting)
 
+find_package(Eigen3 REQUIRED)
+
 add_library(PointSetsFitting STATIC psf.cpp psf.h)
 target_include_directories(PointSetsFitting INTERFACE .)
-target_compile_features(PointSetsFitting PRIVATE cxx_std_17)
+target_link_libraries(PointSetsFitting Eigen3::Eigen )
+target_compile_features(PointSetsFitting PUBLIC cxx_std_17)
 
 # Test the point sets fitting library with gtest
 option(TESTPSFLIB "Test library" OFF)
