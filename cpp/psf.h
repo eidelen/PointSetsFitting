@@ -10,7 +10,7 @@
  * @param input Vector of 3d-positions
  * @return 4xn Eigen matrix
  */
-Eigen::MatrixXd positionVector2EigenMatrix( const std::vector<std::tuple<double,double,double>>& input );
+Eigen::MatrixXd vectorOfPositions2EigenMatrix(const std::vector<std::tuple<double,double,double>>& input );
 
 /**
  * Computes the center of multiple points.
@@ -18,5 +18,13 @@ Eigen::MatrixXd positionVector2EigenMatrix( const std::vector<std::tuple<double,
  * @return Center in form a 4 x 1 matrix / vector
  */
 Eigen::MatrixXd computeCenterOfPoints( const Eigen::MatrixXd& input );
+
+/**
+ * Translates points such that their center is at the coordinate
+ * system's origin.
+ * @param input 4xn matrix of input points
+ * @return 4xn matrix of centered points and 4x1 translation vector
+ */
+std::pair<Eigen::MatrixXd, Eigen::MatrixXd> centerPoints( const Eigen::MatrixXd& input );
 
 #endif //CPP_PSF_H
