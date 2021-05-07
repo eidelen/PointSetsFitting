@@ -11,9 +11,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v1
     - name: Install gtest manually
       run: sudo apt-get install -y libgtest-dev cmake && sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz && sudo tar xf release-1.7.0.tar.gz && cd googletest-release-1.7.0 && sudo cmake -DBUILD_SHARED_LIBS=ON . && sudo make && sudo cp -a include/gtest /usr/include
-    - uses: actions/checkout@v1
     - name: configure
       run: cd cpp && mkdir build && cd build && cmake -DTESTPSFLIB=ON ..
     - name: make
