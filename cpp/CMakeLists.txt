@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.15.4)
 project(PointSetsFitting)
 
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pthread")
-
 find_package(Eigen3 REQUIRED)
 
 add_library(PointSetsFitting STATIC psf.cpp psf.h)
@@ -18,5 +16,5 @@ IF(${TESTPSFLIB})
     find_package(GTest REQUIRED)
     include_directories(${GTEST_INCLUDE_DIRS})
     add_executable( runPsfLibTests test/main.cpp test/test_psf.cpp)
-    target_link_libraries( runPsfLibTests ${GTEST_LIBRARIES} PointSetsFitting pthread)
+    target_link_libraries( runPsfLibTests ${GTEST_LIBRARIES} PointSetsFitting )
 ENDIF()
