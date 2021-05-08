@@ -63,3 +63,53 @@ TEST(Points, MoveCenter)
     ASSERT_TRUE(outputCenterPoints.isApprox(resCentered));
     ASSERT_TRUE(outputTranslation.isApprox(resTranslation));
 }
+
+TEST(Points, Validate)
+{
+    Eigen::MatrixXd inp0(3,2);
+    inp0 << 1, 2,
+            3, 4,
+            5, 6;
+
+    Eigen::MatrixXd out0(4,2);
+    out0 << 1, 2,
+            3, 4,
+            5, 6,
+            1, 1;
+
+    Eigen::MatrixXd res = validateMatrixOfPoints(inp0);
+    ASSERT_TRUE(out0.isApprox(res));
+
+    Eigen::MatrixXd inp1(4,2);
+    inp1 << 1, 2,
+            3, 4,
+            5, 6,
+            1, 1;
+
+    Eigen::MatrixXd res1 = validateMatrixOfPoints(inp1);
+    ASSERT_TRUE(inp1.isApprox(res1));
+}
+
+TEST(Fitting, IvalidInput)
+{
+    Eigen::MatrixXd inpA0(2,3);
+    ASSERT_ANY_THROW(pointSetsFitting(inpA0, inpA0));
+
+    Eigen::MatrixXd inpA1(3,3);
+    Eigen::MatrixXd inpB1(3,4);
+    ASSERT_ANY_THROW(pointSetsFitting(inpA1, inpB1));
+
+    Eigen::MatrixXd inpA2(3,2);
+    ASSERT_ANY_THROW(pointSetsFitting(inpA2, inpA2));
+}
+
+TEST(Fitting, Identity)
+{
+    Eigen::MatrixXd inp(3,3);
+    inp << 1, 1, 0,
+           1, 0, 3,
+           1, 0, 8;
+
+    //auto[transformation, error] = pointSetsFitting(inp, inp);
+    //ASSERT_TRUE(Eigen::MatrixXd::Identity(4,4).isApprox(transformation));
+}
