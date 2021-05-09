@@ -111,5 +111,7 @@ TEST(Fitting, Identity)
            1, 0, 8;
 
     //auto[transformation, error] = pointSetsFitting(inp, inp);
+    //std::cout << transformation << ", " << error << std::endl;
     //ASSERT_TRUE(Eigen::MatrixXd::Identity(4,4).isApprox(transformation));
+    //ASSERT_NEAR(error, 0.0, 0.0001);
 }

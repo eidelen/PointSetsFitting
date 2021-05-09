@@ -17,12 +17,27 @@ std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA,
     auto[setBCentered, transB] = centerPoints(setBVal);
 
     Eigen::MatrixXd h = Eigen::MatrixXd::Zero(3, 3);
-    for(size_t i = 0; i < setACentered.size(); i++)
+    for(size_t i = 0; i < setACentered.cols(); i++)
     {
-        h = h + setACentered.block(0,i,3,1).transpose() * setBCentered.block(0,i,3,1);
+        h = h + setACentered.block(0,i,3,1) * setBCentered.block(0,i,3,1).transpose();
     }
 
-    std::cout << h << std::endl;
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(h, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    Eigen::MatrixXd lsqRotation = svd.matrixV().transpose() * svd.matrixU().transpose();
+
+    // fix rotation if necessary -> reflections
+    if( lsqRotation.determinant() < 0 )
+    {
+        Eigen::MatrixXd correctedV = svd.matrixV();
+        correctedV.row(2) = correctedV.row(2) * (-1.0);
+        lsqRotation = correctedV * svd.matrixU().transpose();
+    }
+
+    Eigen::MatrixXd rigidTransformation = Eigen::MatrixXd::Identity(4,4);
+    rigidTransformation.block(0,0,3,3) = lsqRotation;
+    rigidTransformation.block(0,3,3,1) = transB.topRows(3) - (lsqRotation * transA.topRows(3));
+
+    return {rigidTransformation, 0.0};
 }
 
 Eigen::MatrixXd vectorOfPositions2EigenMatrix(const std::vector<std::tuple<double,double,double>>& input )
