@@ -123,3 +123,22 @@ TEST(Fitting, Translation)
     ASSERT_TRUE(t.isApprox(transformation));
     ASSERT_NEAR(error, 0.0, 0.0001);
 }
+
+TEST(Error, FittingError)
+{
+    Eigen::MatrixXd setA(4,4);
+    setA << 0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 2,
+            1, 1, 1, 1;
+
+    Eigen::MatrixXd setB(4,4);
+    setB << 0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, -2,
+            1, 1, 1, 1;
+
+    double fittingError = 1.0;
+    double resFittingError = computeFittingError(setA, setB, Eigen::MatrixXd::Identity(4,4));
+    ASSERT_NEAR(fittingError, resFittingError, 0.0001);
+}

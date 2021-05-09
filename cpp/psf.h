@@ -42,4 +42,13 @@ std::pair<Eigen::MatrixXd, Eigen::MatrixXd> centerPoints( const Eigen::MatrixXd&
  */
 Eigen::MatrixXd validateMatrixOfPoints(const Eigen::MatrixXd& input);
 
+/**
+ * Computes the fitting error.
+ * @param setA Point set A as 4xn matrix
+ * @param setB Point set B as 4xn matrix
+ * @param transformation 4x4 rigid transformation
+ * @return Average fitting error
+ */
+double computeFittingError(const Eigen::MatrixXd& setA, const Eigen::MatrixXd& setB, const Eigen::MatrixXd& transformation);
+
 #endif //CPP_PSF_H

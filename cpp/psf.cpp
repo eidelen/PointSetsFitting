@@ -1,6 +1,5 @@
 #include "psf.h"
 
-#include <iostream>
 #include <exception>
 #include <vector>
 
@@ -33,11 +32,12 @@ std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA,
         lsqRotation = correctedV * svd.matrixU().transpose();
     }
 
+    // Assemble transformation
     Eigen::MatrixXd rigidTransformation = Eigen::MatrixXd::Identity(4,4);
     rigidTransformation.block(0,0,3,3) = lsqRotation;
     rigidTransformation.block(0,3,3,1) = transB.topRows(3) - (lsqRotation * transA.topRows(3));
 
-    return {rigidTransformation, 0.0};
+    return {rigidTransformation, computeFittingError(setAVal, setBVal, rigidTransformation)};
 }
 
 Eigen::MatrixXd vectorOfPositions2EigenMatrix(const std::vector<std::tuple<double,double,double>>& input )
@@ -72,4 +72,10 @@ Eigen::MatrixXd validateMatrixOfPoints(const Eigen::MatrixXd& input)
     validated.topRows(3) = input.topRows(3);
     validated.row(3).fill(1.0);
     return validated;
+}
+
+double computeFittingError(const Eigen::MatrixXd& setA, const Eigen::MatrixXd& setB, const Eigen::MatrixXd& transformation)
+{
+    Eigen::MatrixXd diffSetB = ((transformation * setA) - setB).topRows(3);
+    return diffSetB.colwise().norm().mean();
 }
