@@ -19,11 +19,11 @@ std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA,
     Eigen::MatrixXd h = Eigen::MatrixXd::Zero(3, 3);
     for(size_t i = 0; i < setACentered.cols(); i++)
     {
-        h = h + setACentered.block(0,i,3,1) * setBCentered.block(0,i,3,1).transpose();
+        h = h + (setACentered.block(0,i,3,1) * setBCentered.block(0,i,3,1).transpose());
     }
 
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(h, Eigen::ComputeFullU | Eigen::ComputeFullV);
-    Eigen::MatrixXd lsqRotation = svd.matrixV().transpose() * svd.matrixU().transpose();
+    Eigen::MatrixXd lsqRotation = svd.matrixV() * svd.matrixU().transpose();
 
     // fix rotation if necessary -> reflections
     if( lsqRotation.determinant() < 0 )
@@ -59,11 +59,11 @@ Eigen::MatrixXd computeCenterOfPoints( const Eigen::MatrixXd& input )
 
 std::pair<Eigen::MatrixXd, Eigen::MatrixXd> centerPoints(const Eigen::MatrixXd &input)
 {
-    Eigen::MatrixXd centerTranslation = -computeCenterOfPoints(input);
-    centerTranslation(3,0) = 1.0;
+    Eigen::MatrixXd centerPos = computeCenterOfPoints(input);
+    centerPos(3,0) = 1.0;
     Eigen::MatrixXd toCenterTransform = Eigen::MatrixXd::Identity(4, 4);
-    toCenterTransform.col(3) = centerTranslation;
-    return {toCenterTransform * input, centerTranslation};
+    toCenterTransform.block(0,3,3,1) = (-centerPos).topRows(3);
+    return {toCenterTransform * input, centerPos};
 }
 
 Eigen::MatrixXd validateMatrixOfPoints(const Eigen::MatrixXd& input)
@@ -73,4 +73,3 @@ Eigen::MatrixXd validateMatrixOfPoints(const Eigen::MatrixXd& input)
     validated.row(3).fill(1.0);
     return validated;
 }
-
