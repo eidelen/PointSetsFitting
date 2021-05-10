@@ -7,7 +7,7 @@ std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA,
 {
     // check input: same number points in each set, at least 3 points
     if( setA.cols() != setB.cols() || setA.cols() < 3 || setA.rows() < 3 || setB.rows() < 3 )
-        throw "Invalid input";
+        throw std::invalid_argument("Invalid input dimensions");
 
     Eigen::MatrixXd setAVal = validateMatrixOfPoints(setA);
     Eigen::MatrixXd setBVal = validateMatrixOfPoints(setB);
@@ -28,7 +28,7 @@ std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA,
     if( lsqRotation.determinant() < 0 )
     {
         Eigen::MatrixXd correctedV = svd.matrixV();
-        correctedV.row(2) = correctedV.row(2) * (-1.0);
+        correctedV.col(2) = correctedV.col(2) * (-1.0);
         lsqRotation = correctedV * svd.matrixU().transpose();
     }
 

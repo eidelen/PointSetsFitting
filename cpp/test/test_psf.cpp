@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <tuple>
+#include <Eigen/Geometry>
 #include "psf.h"
 
 TEST(Points, PosVec2Mat)
@@ -142,3 +143,35 @@ TEST(Error, FittingError)
     double resFittingError = computeFittingError(setA, setB, Eigen::MatrixXd::Identity(4,4));
     ASSERT_NEAR(fittingError, resFittingError, 0.0001);
 }
+
+TEST(Fitting, RandomTransformations)
+{
+    for(size_t n : {3, 4, 5, 6, 7, 8, 9, 10, 20, 40, 80, 160, 500, 1000, 10000})
+    {
+        std::cout << "Transformation for n = " << n << std::endl;
+        for(size_t run = 0; run < 50; run++)
+        {
+            // create random point set
+            Eigen::MatrixXd setA = Eigen::MatrixXd::Random(4,n)*10.0;
+            setA.row(3).fill(1.0);
+
+            // create random transformation
+            Eigen::MatrixXd translation = Eigen::MatrixXd::Random(3,1)*10.0;
+            Eigen::MatrixXd rotation = Eigen::MatrixXd::Random(3,1);
+            Eigen::Affine3d t;
+            t = Eigen::Translation3d(translation);
+            t.rotate(Eigen::AngleAxisd(rotation(0,0), Eigen::Vector3d::UnitZ())
+                     * Eigen::AngleAxisd(rotation(1,0), Eigen::Vector3d::UnitY())
+                     * Eigen::AngleAxisd(rotation(2,0), Eigen::Vector3d::UnitZ()));
+
+            // error free transformation -> set B
+            Eigen::MatrixXd setB = t.matrix() * setA;
+
+            auto[transformation, error] = pointSetsFitting(setA, setB);
+            ASSERT_TRUE(t.matrix().isApprox(transformation));
+            ASSERT_NEAR(error, 0.0, 0.0001);
+        }
+    }
+
+}
+
