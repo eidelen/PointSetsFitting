@@ -1,6 +1,6 @@
 # PointSetsFitting
 
-This is a python implementation of the algorithm "Least-Squares Fitting of two 3d Point Sets". This method can be used to compute the rigid transformation between two sets of corresponding 3D vectors. 
+In this repository are implementations of the algorithm "Least-Squares Fitting of two 3d Point Sets" in python and C++. This method can be used to compute the rigid transformation between two sets of corresponding 3D vectors. 
 
 
 # Point sets and the rigid transformation
