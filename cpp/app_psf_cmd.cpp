@@ -55,17 +55,23 @@ int main(int argc, char** argv)
     for(size_t ac = 1; ac < argc; ac++)
         input.append(argv[ac]);
 
-    auto[setA, setB] = processInput(input);
+    try
+    {
+        auto[setA, setB] = processInput(input);
 
-    Eigen::IOFormat matOutputFormat(Eigen::StreamPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
+        std::cout << matAsStr("Point Set A:", setA.topRows(3)) << std::endl;
+        std::cout << matAsStr("Point Set B:", setB.topRows(3)) << std::endl;
 
-    std::cout << matAsStr("Point Set A:", setA.topRows(3)) << std::endl;
-    std::cout << matAsStr("Point Set B:", setB.topRows(3)) << std::endl;
+        auto[ transformation, error ] = pointSetsFitting(setA, setB);
 
-    auto[ transformation, error ] = pointSetsFitting(setA, setB);
-
-    std::cout << matAsStr("Transformation A -> B:", transformation) << std::endl;
-    std::cout << std::fixed << std::setprecision(5) << "Fitting Error: " << error << std::endl;
+        std::cout << matAsStr("Transformation A -> B:", transformation) << std::endl;
+        std::cout << std::fixed << std::setprecision(5) << "Fitting Error: " << error << std::endl;
+    }
+    catch( std::exception& e)
+    {
+        std::cout << "Error occurred: " << e.what() << std::endl;
+        std::cout << "Usage: setA_Pnt1.x, setA_Pnt1.y, setA_Pnt1.z ; setA_Pnt2.x, ....  :  setB_Pnt1.x, ...." << std::endl;
+    }
 
     return 0;
 }
