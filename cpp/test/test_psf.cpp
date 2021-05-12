@@ -24,6 +24,16 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd> generatePointSetsA
     return {setA, setB, t.matrix()};
 }
 
+std::tuple<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd> generatePointSetsAndTransformationWithNoise(size_t nbrPoints, double noise)
+{
+    auto[setA, setB, t] = generatePointSetsAndTransformation(nbrPoints);
+
+    // introduce noise to set B
+    Eigen::MatrixXd setBNoise = setB.topRows(3) + Eigen::MatrixXd::Random(3,nbrPoints) * noise;
+
+    return {setA, setBNoise, t.matrix()};
+}
+
 TEST(Points, PosVec2Mat)
 {
     std::vector<std::tuple<double,double,double>> input = {{0.0, 1.0, 2.0}, {3.0, 4.0, 5.0}};
@@ -176,6 +186,7 @@ TEST(Fitting, RandomTransformations)
             auto[transformation, error] = pointSetsFitting(setA, setB);
             ASSERT_TRUE(t.matrix().isApprox(transformation));
             ASSERT_NEAR(error, 0.0, 0.0001);
+            ASSERT_NEAR(t.matrix().determinant(), 1.0, 0.0001);
         }
     }
 }
@@ -199,6 +210,29 @@ TEST(Fitting, RandomTransformationsNoise)
             // check translation
             ASSERT_TRUE(t.matrix().block(0,3,3,1).isApprox(transformation.block(0,3,3,1), 0.2));
             ASSERT_LT(0.0, error);
+            ASSERT_NEAR(t.matrix().determinant(), 1.0, 0.0001);
         }
+    }
+}
+
+TEST(Fitting, RandomTransformationsIncreaseNoise)
+{
+    double errorBefore = 0.0;
+    std::vector<double> noiseLevels(20);
+    std::generate(noiseLevels.begin(), noiseLevels.end(), [] () {
+        static double ns = 0.0;
+        return (ns += 0.2);
+    });
+
+    for(double noise : noiseLevels)
+    {
+        auto[setA, setB, t] = generatePointSetsAndTransformationWithNoise(500, noise);
+        auto[transformation, error] = pointSetsFitting(setA, setB);
+
+        std::cout << "noise " << noise << ": error " << error  << std::endl;
+
+        ASSERT_LE(errorBefore, error);
+        ASSERT_NEAR(t.matrix().determinant(), 1.0, 0.0001);
+        errorBefore = error;
     }
 }
