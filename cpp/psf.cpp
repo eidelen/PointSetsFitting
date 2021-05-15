@@ -15,10 +15,22 @@ std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA,
     auto[setACentered, transA] = centerPoints(setAVal);
     auto[setBCentered, transB] = centerPoints(setBVal);
 
+    Eigen::MatrixXd lsqRotation = computeLsqRotation(setACentered, setBCentered);
+
+    // Assemble transformation
+    Eigen::MatrixXd rigidTransformation = Eigen::MatrixXd::Identity(4,4);
+    rigidTransformation.block(0,0,3,3) = lsqRotation;
+    rigidTransformation.block(0,3,3,1) = transB.topRows(3) - (lsqRotation * transA.topRows(3));
+
+    return {rigidTransformation, computeFittingError(setAVal, setBVal, rigidTransformation)};
+}
+
+Eigen::MatrixXd computeLsqRotation(const Eigen::MatrixXd& setCenteredA, const Eigen::MatrixXd& setCenteredB)
+{
     Eigen::MatrixXd h = Eigen::MatrixXd::Zero(3, 3);
-    for(size_t i = 0; i < setACentered.cols(); i++)
+    for(size_t i = 0; i < setCenteredA.cols(); i++)
     {
-        h = h + (setACentered.block(0,i,3,1) * setBCentered.block(0,i,3,1).transpose());
+        h = h + (setCenteredA.block(0,i,3,1) * setCenteredB.block(0,i,3,1).transpose());
     }
 
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(h, Eigen::ComputeFullU | Eigen::ComputeFullV);
@@ -32,12 +44,7 @@ std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA,
         lsqRotation = correctedV * svd.matrixU().transpose();
     }
 
-    // Assemble transformation
-    Eigen::MatrixXd rigidTransformation = Eigen::MatrixXd::Identity(4,4);
-    rigidTransformation.block(0,0,3,3) = lsqRotation;
-    rigidTransformation.block(0,3,3,1) = transB.topRows(3) - (lsqRotation * transA.topRows(3));
-
-    return {rigidTransformation, computeFittingError(setAVal, setBVal, rigidTransformation)};
+    return lsqRotation;
 }
 
 Eigen::MatrixXd vectorOfPositions2EigenMatrix(const std::vector<std::tuple<double,double,double>>& input )

@@ -156,6 +156,25 @@ TEST(Fitting, Translation)
     ASSERT_NEAR(error, 0.0, 0.0001);
 }
 
+TEST(Fitting, Rotation)
+{
+    // 90° z rotation -> point sets are centered
+    Eigen::MatrixXd setA(3,4);
+    setA << 0, 1, 0, -1,
+            -1, 0, 1, 0,
+            0, 0, 0, 0;
+
+    Eigen::MatrixXd setB(3,4);
+    setB << 1, 0, -1, 0,
+            0, 1, 0, -1,
+            0, 0, 0, 0;
+    Eigen::Affine3d t;
+    t = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitZ());
+
+    auto compRot = computeLsqRotation(setA, setB);
+    ASSERT_TRUE(t.matrix().block(0,0,3,3).isApprox(compRot));
+}
+
 TEST(Error, FittingError)
 {
     Eigen::MatrixXd setA(4,4);

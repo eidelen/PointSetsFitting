@@ -14,6 +14,14 @@
 std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA, const Eigen::MatrixXd& setB);
 
 /**
+ * Compute the rotation matrix between two centered point sets.
+ * @param setA Centered point set A
+ * @param setB Centered point set B
+ * @return Rotation matrix R, such that A = R * B
+ */
+Eigen::MatrixXd computeLsqRotation(const Eigen::MatrixXd& setA, const Eigen::MatrixXd& setB);
+
+/**
  * Creates a 4xn Eigen matrix from an input vector of 3d-positions.
  * @param input Vector of 3d-positions
  * @return 4xn Eigen matrix
