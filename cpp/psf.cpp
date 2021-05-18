@@ -93,15 +93,14 @@ std::tuple<Eigen::MatrixXd, double, std::vector<size_t>> pointSetsCorrespondence
 {
     size_t nPoints = setA.cols();
 
-
     std::vector<size_t> corrsp(nPoints);
     std::iota(corrsp.begin(), corrsp.end(), 0);
-
 
     std::tuple<Eigen::MatrixXd, double, std::vector<size_t>> bestSolution = {Eigen::MatrixXd::Identity(4,4),
                                                                              std::numeric_limits<double>::max(), {}};
 
-    // permute over all correspondence permutations of set B
+    // permute over all correspondence permutations of set B and
+    // choose the one with lowest error.
     do
     {
         // assemble set B
