@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <tuple>
+#include <algorithm>
 #include <Eigen/Geometry>
 #include "psf.h"
 
@@ -253,5 +254,46 @@ TEST(Fitting, RandomTransformationsIncreaseNoise)
         ASSERT_LE(errorBefore, error);
         ASSERT_NEAR(t.matrix().determinant(), 1.0, 0.0001);
         errorBefore = error;
+    }
+}
+
+TEST(Correspondence, OneSwitched)
+{
+    Eigen::MatrixXd setA(3,4);
+    setA << 0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 2;
+
+    // points 3 and 4 are switched
+    Eigen::MatrixXd setB(3,4);
+    setB << 10, 11, 10, 10,
+            2, 2,   2,  3,
+            5, 5,   7,  5;
+
+    Eigen::MatrixXd t = Eigen::MatrixXd::Identity(4,4);
+    t.block(0,3,3,1) << 10, 2, 5;
+
+    std::vector<size_t> shouldCorr = {0, 1, 3, 2};
+
+    auto[transformation, error, corresp] = pointSetsCorrespondence(setA, setB);
+    ASSERT_TRUE(t.isApprox(transformation));
+    ASSERT_EQ(shouldCorr, corresp);
+    ASSERT_NEAR(error, 0.0, 0.0001);
+}
+
+TEST(Correspondence, AllSwitched)
+{
+    // 5 points missing correspondences
+    for(int k = 0; k < 500; k++)
+    {
+        auto[setA, setB, t] = generatePointSetsAndTransformation(5);
+
+        std::vector<size_t> shouldCorr = {4, 3, 2, 1, 0};
+        Eigen::MatrixXd newB = Eigen::MatrixXd(4, 5);
+
+        auto[transformation, error, corresp] = pointSetsCorrespondence(setA, setB.rowwise().reverse());
+        ASSERT_TRUE(t.isApprox(transformation));
+        ASSERT_EQ(shouldCorr, corresp);
+        ASSERT_NEAR(error, 0.0, 0.0001);
     }
 }

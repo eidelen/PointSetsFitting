@@ -14,6 +14,17 @@
 std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA, const Eigen::MatrixXd& setB);
 
 /**
+ * Finds the point-to-point correspondences between two
+ * point sets which results in the lowest rigid
+ * transformation error.
+ * @param setA Point set A (4xn or 3xn matrix)
+ * @param setB Point set B (4xn or 3xn matrix)
+ * @return Rigid transformation, transformation error, correspondences
+ */
+std::tuple<Eigen::MatrixXd, double, std::vector<size_t>> pointSetsCorrespondence(const Eigen::MatrixXd& setA,
+                                                                                                    const Eigen::MatrixXd& setB);
+
+/**
  * Compute the rotation matrix between two centered point sets.
  * @param setA Centered point set A
  * @param setB Centered point set B

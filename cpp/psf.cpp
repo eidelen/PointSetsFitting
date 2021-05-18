@@ -2,6 +2,8 @@
 
 #include <exception>
 #include <vector>
+#include <numeric>
+#include <iostream>
 
 std::pair<Eigen::MatrixXd, double> pointSetsFitting(const Eigen::MatrixXd& setA, const Eigen::MatrixXd& setB)
 {
@@ -85,4 +87,38 @@ double computeFittingError(const Eigen::MatrixXd& setA, const Eigen::MatrixXd& s
 {
     Eigen::MatrixXd diffSetB = ((transformation * setA) - setB).topRows(3);
     return diffSetB.colwise().norm().mean();
+}
+
+std::tuple<Eigen::MatrixXd, double, std::vector<size_t>> pointSetsCorrespondence(const Eigen::MatrixXd& setA, const Eigen::MatrixXd& setB)
+{
+    size_t nPoints = setA.cols();
+
+
+    std::vector<size_t> corrsp(nPoints);
+    std::iota(corrsp.begin(), corrsp.end(), 0);
+
+
+    std::tuple<Eigen::MatrixXd, double, std::vector<size_t>> bestSolution = {Eigen::MatrixXd::Identity(4,4),
+                                                                             std::numeric_limits<double>::max(), {}};
+
+    // permute over all correspondence permutations of set B
+    do
+    {
+        // assemble set B
+        std::vector<size_t> newCorrsp;
+        Eigen::MatrixXd newSetB(3, nPoints);
+        for(size_t q = 0; q < nPoints; q++)
+        {
+            newCorrsp.push_back(corrsp[q]);
+            newSetB.col(q) = setB.block(0, corrsp[q], 3, 1);
+        }
+
+        auto[trans, error] = pointSetsFitting(setA, newSetB);
+
+        if( error < std::get<1>(bestSolution) )
+            bestSolution = {trans, error, newCorrsp};
+    }
+    while ( std::next_permutation(corrsp.begin(), corrsp.end()) );
+
+    return bestSolution;
 }
