@@ -37,9 +37,12 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd> generatePointSetsA
 
 TEST(Points, PosVec2Mat)
 {
-    std::vector<std::tuple<double,double,double>> input = {{0.0, 1.0, 2.0}, {3.0, 4.0, 5.0}};
-    Eigen::MatrixXd output(4, 2);
-    output << 0.0, 3.0, 1.0, 4.0, 2.0, 5.0, 1.0, 1.0;
+    std::vector<std::tuple<double,double,double>> input = {{0.0, 1.0, 2.0}, {3.0, 4.0, 5.0}, {6.0, 7.0, 8.0}};
+    Eigen::MatrixXd output(4, 3);
+    output << 0.0, 3.0, 6.0, 
+              1.0, 4.0, 7.0, 
+              2.0, 5.0, 8.0, 
+              1.0, 1.0, 1.0;
 
     auto toEigen = vectorOfPositions2EigenMatrix(input);
 
