@@ -11,6 +11,6 @@ In regards to the image below, the 3D vectors in the first point set are defined
 
 where G is a 4x4 matrix and both vectors V are homogeneous coordinates of the form [x,y,z,1.0]'.
 
-<p align="center"><img alt="smoothing" src="http://eidelen.diffuse.ch/transErr.png" width="50%"></p>
+<p align="center"><img alt="smoothing" src="docs/img/transErr.png" width="50%"></p>
 
 Often, the computed transformation G does not fit the two point sets perfectly. One reason for that can be noise during the point acquisitions. That results in a transformation error. In this implementation, the transformation error is the average of all the Euclidean distances between the transformed and actual point coordinate.
