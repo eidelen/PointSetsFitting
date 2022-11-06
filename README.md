@@ -1,3 +1,5 @@
+![psf cpp build status](https://github.com/eidelen/PointSetsFitting/actions/workflows/cpp.yml/badge.svg) ![psf python build status](https://github.com/eidelen/PointSetsFitting/actions/workflows/pythonpackage.yml/badge.svg)
+
 # PointSetsFitting
 
 In this repository are implementations of the algorithm "Least-Squares Fitting of two 3d Point Sets" in Python and C++. This method can be used to compute the rigid transformation between two sets of corresponding 3D vectors. 
