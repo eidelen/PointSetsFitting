@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Install gtest manually
-      run: sudo apt-get install -y libgtest-dev libeigen3-dev cmake && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && ls -a && cd lib && sudo cp *.a /usr/lib
+    - name: Install
+      run: sudo apt-get install -y libeigen3-dev cmake 
     - name: configure
       run: cd cpp && mkdir build && cd build && cmake -DTESTPSFLIB=ON ..
     - name: make
