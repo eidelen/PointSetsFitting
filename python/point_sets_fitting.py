@@ -17,12 +17,19 @@ def point_sets_fitting(set_a: np.ndarray, set_b: np.ndarray) -> Tuple[np.ndarray
     """
 
     # check input data
-    if set_a.shape[0] < 3 or set_b.shape[0] < 3: # data dimension
+    if 4 < set_a.shape[0] < 3 or 4 < set_b.shape[0] < 3: # data dimension
         raise Exception('Wrong vector dimension')
     if set_a.shape[1] < 3:
         raise Exception('Too few point correspondences')
     if set_a.shape[1] != set_b.shape[1]:
         raise Exception('Mismatching point set sizes')
+
+    # If homogeneous coordinate input, adapt
+    if set_a.shape[0] == 4:
+        set_a = set_a[:-1, :]
+    if set_b.shape[0] == 4:
+        set_b = set_b[:-1, :]
+
 
     # move point sets to center
     centered_a, translation_a = move_point_set_to_center(set_a)

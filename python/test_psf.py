@@ -52,6 +52,20 @@ class PsfTester(unittest.TestCase):
         np.testing.assert_array_almost_equal(expected_transformation, transformation, decimal=5)
         self.assertAlmostEqual(expected_error, err, delta = 0.0001)
 
+    def test_fitting_identity_homogeneous(self):
+
+        set_a = np.array([[0, 0, 0, 1], [1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 2, 1]]).transpose()
+        set_b = np.array([[0, 0, 0, 1], [1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 2, 1]]).transpose()
+
+        expected_error = 0;
+        expected_transformation = np.eye(4,4)
+
+        transformation, err = psf.point_sets_fitting(set_a, set_b)
+
+        np.testing.assert_array_almost_equal(expected_transformation, transformation, decimal=5)
+        self.assertAlmostEqual(expected_error, err, delta = 0.0001)
+
+
 
     def test_fitting_differen_set_lengths(self):
         with self.assertRaises(Exception):
@@ -69,13 +83,18 @@ class PsfTester(unittest.TestCase):
 
     def test_fitting_vector_dimension(self):
         with self.assertRaises(Exception):
-            listA = [[0, 0], [1, 0], [0, 1]]
-            listB = [[0, 0, 0], [1, 0, 0], [0, 1, 0]]
+            listA = [[0, 0], [1, 0], [0, 1]].transpose()
+            listB = [[0, 0, 0], [1, 0, 0], [0, 1, 0]].transpose()
             psf.point_sets_fitting(listA, listB)
 
         with self.assertRaises(Exception):
-            listA = [[0, 0, 0], [1, 0, 0], [0, 1, 0]]
-            listB = [[0, 0], [1, 0], [0, 1]]
+            listA = [[0, 0, 0], [1, 0, 0], [0, 1, 0]].transpose()
+            listB = [[0, 0], [1, 0], [0, 1]].transpose()
+            psf.point_sets_fitting(listA, listB)
+
+        with self.assertRaises(Exception): # 5d
+            listA = [[0, 0, 0, 0, 0], [1, 0, 0, 0, 0], [0, 1, 0, 0, 0]].transpose()
+            listB = [[0, 0, 0, 0, 0], [1, 0, 0, 0, 0], [0, 1, 0, 0, 0]].transpose()
             psf.point_sets_fitting(listA, listB)
 
 
